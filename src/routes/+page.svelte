@@ -197,7 +197,7 @@
             bind:this={inputRef}
             disabled={env.PUBLIC_ANONYMOUS_PASTES_ENABLED === 'false' &&
                 !data.loggedIn}
-        />
+        ></textarea>
         <div
             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-lg -z-10 opacity-40 hidden"
             class:hidden={content}
@@ -367,37 +367,6 @@
                 </div>
             </div>
 
-            <a
-                class="underline underline-offset-4 px-2 py-1"
-                href="https://github.com/Yureien/YABin"
-            >
-                Source Code
-            </a>
-
-            <a
-                class="underline underline-offset-4 px-2 py-1"
-                href="https://github.com/Yureien/YABin/tree/main/cli"
-            >
-                CLI Client
-            </a>
-
-            <div class="flex flex-row gap-4 justify-center">
-                <a
-                    class="github-button"
-                    href="https://github.com/sponsors/Yureien"
-                    data-color-scheme="no-preference: dark; light: light; dark: dark;"
-                    data-size="large"
-                    aria-label="Sponsor @Yureien on GitHub">Sponsor</a
-                >
-                <a
-                    class="github-button"
-                    href="https://github.com/Yureien/YABin"
-                    data-color-scheme="no-preference: dark; light: light; dark: dark;"
-                    data-size="large"
-                    data-show-count="true"
-                    aria-label="Star Yureien/YABin on GitHub">Star</a
-                >
-            </div>
         </div>
     </div>
 </div>
