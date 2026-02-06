@@ -1,4 +1,4 @@
-import { json, type HttpError, type RequestHandler } from '@sveltejs/kit';
+import { json, type RequestHandler } from '@sveltejs/kit';
 import type {
     Paste,
     PasteCreateResponse,
@@ -22,12 +22,11 @@ export const GET: RequestHandler = async ({ url }) => {
     let paste;
     try {
         paste = await getPaste(key);
-    } catch (e) {
-        if (e?.constructor?.name === 'HttpError') {
-            const httpError = e as HttpError;
+    } catch (e: any) {
+        if (e?.status && e?.body?.message) {
             return json(
-                { success: false, error: httpError.body.message },
-                { status: httpError.status },
+                { success: false, error: e.body.message },
+                { status: e.status },
             );
         }
         return json(
