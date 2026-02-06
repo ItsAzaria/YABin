@@ -4,18 +4,15 @@
     import type {
         Paste,
         PasteConfig,
-        PasteCreateResponse,
-        UserSettings,
+        PasteCreateResponse
     } from '$lib/types';
     import { onMount } from 'svelte';
-    import Select from 'svelte-select';
+    import Select from 'svelte-select-5';
     import { encrypt, encryptWithPassword } from '$lib/crypto';
     import Hamburger from '$lib/components/Hamburger.svelte';
     import { env } from '$env/dynamic/public';
     import type { PageData } from './$types';
     import { DHMToSeconds, secondsToDHM } from '$lib/utils/time';
-
-    export let data: PageData;
 
     const initialConfig: PasteConfig = {
         language: 'plaintext',
@@ -53,19 +50,6 @@
     let config: PasteConfig = { ...initialConfig };
     let sidebarOpen = false;
 
-    const updateInitialConfig = (defaults: UserSettings['defaults']) => {
-        if (!defaults) return;
-        if (defaults?.encrypted !== undefined)
-            config.encrypted = defaults.encrypted;
-        if (defaults?.burnAfterRead !== undefined)
-            config.burnAfterRead = defaults.burnAfterRead;
-        if (defaults?.expiresAfterSeconds) {
-            expiresAfter = secondsToDHM(defaults.expiresAfterSeconds);
-            config.expiresAfter = defaults.expiresAfterSeconds;
-        }
-    };
-    $: updateInitialConfig(data?.settings?.defaults);
-
     let _sessionStorage: Storage | undefined;
 
     $: if (_sessionStorage) {
@@ -100,25 +84,8 @@
                 e.preventDefault();
                 save();
             }
-
-            if (e.key === 'n' && (e.ctrlKey || e.metaKey)) {
-                newPaste(e);
-            }
-
-            if (e.key === 'i' && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                goto('/info');
-            }
         });
     });
-
-    const newPaste = (e: any) => {
-        e?.preventDefault();
-        content = '';
-        password = '';
-        config = { ...initialConfig };
-        sessionStorage.removeItem('contentBackup');
-    };
 
     const save = async () => {
         if (!content) return;
@@ -179,7 +146,7 @@
 </script>
 
 <div class="sm:hidden flex flex-row gap-2 items-center px-4 py-2">
-    <h1 class="text-4xl mr-auto"><a href="/">YABin</a></h1>
+    <h1 class="text-4xl mr-auto"><a href="/">Pastecord</a></h1>
 
     <button class="bg-amber-500 text-black text-lg px-4 py-1" on:click={save}
         >Save</button
@@ -195,94 +162,29 @@
             spellcheck="false"
             bind:value={content}
             bind:this={inputRef}
-            disabled={env.PUBLIC_ANONYMOUS_PASTES_ENABLED === 'false' &&
-                !data.loggedIn}
         ></textarea>
         <div
             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-lg -z-10 opacity-40 hidden"
             class:hidden={content}
             bind:this={placeholderRef}
-        >
-            {#if env.PUBLIC_ANONYMOUS_PASTES_ENABLED === 'false' && !data.loggedIn}
-                Anonymous pastes are disabled on this server. <br />
-                You need to login to save pastes.
-            {:else}
-                Type or paste anything here, and then {cmdKey}+S to save.
-            {/if}
-            <br /><br />
-            Visit Info page to get the APIs and more.
+        >Type or paste anything here, and then {cmdKey}+S to save.<br /><br />
         </div>
     </div>
     <div
-        class="sm:col-span-4 lg:col-span-2 max-sm:fixed max-sm:bg-black max-sm:bg-opacity-50 max-sm:backdrop-blur max-sm:h-full max-sm:w-full max-h-screen overflow-x-hidden overflow-y-auto"
+        class="sm:col-span-4 lg:col-span-2 max-sm:fixed max-sm:bg-black max-sm:bg-opacity-50 max-sm:backdrop-blur-sm max-sm:h-full max-sm:w-full max-h-screen overflow-x-hidden overflow-y-auto"
         class:expanded={sidebarOpen}
         id="sidebar"
     >
         <div class="xl:py-4 px-2 md:mt-4 flex flex-col items-center gap-2 2xl:gap-4">
-            <h1 class="text-4xl mb-5 max-sm:hidden"><a href="/">YABin</a></h1>
+            <h1 class="text-4xl mb-5 max-sm:hidden"><a href="/">Pastecord</a></h1>
 
-            {#if env.PUBLIC_ANONYMOUS_PASTES_ENABLED === 'false' && !data.loggedIn}
-                <button
-                    class="bg-amber-500 text-black text-lg px-4 py-1 my-1 w-full max-sm:hidden"
-                    title="{cmdKey}+S"
-                    on:click={() => goto('/login')}
-                >
-                    Login
-                </button>
-            {:else}
-                <button
-                    class="bg-amber-500 text-black text-lg px-4 py-1 my-1 w-full max-sm:hidden"
-                    title="{cmdKey}+S"
-                    on:click={save}
-                >
-                    Save
-                </button>
-            {/if}
-
-            <div class="flex flex-row gap-4 justify-center">
-                <button
-                    class="underline underline-offset-4 py-1"
-                    title="{cmdKey}+N"
-                    on:click={newPaste}
-                >
-                    New
-                </button>
-                <button
-                    class="underline underline-offset-4 px-2 py-1"
-                    title="{cmdKey}+N"
-                    on:click={() => goto('/info')}
-                >
-                    Info
-                </button>
-            </div>
-
-            {#if env.PUBLIC_ANONYMOUS_PASTES_ENABLED !== 'false' || data.loggedIn}
-                <div class="flex flex-row gap-4 mb-4 justify-center">
-                    {#if data.loggedIn}
-                        <a
-                            href="/dashboard/settings"
-                            class="underline underline-offset-4 py-1"
-                            >Dashboard</a
-                        >
-                        <form action="/logout" method="post">
-                            <button class="underline underline-offset-4 py-1"
-                                >Logout</button
-                            >
-                        </form>
-                    {:else}
-                        <a
-                            class="underline underline-offset-4 py-1"
-                            href="/login">Login</a
-                        >
-                        {#if env.PUBLIC_REGISTRATION_ENABLED == 'true'}
-                            <a
-                                class="underline underline-offset-4 py-1"
-                                href="/register">Register</a
-                            >
-                        {/if}
-                    {/if}
-                </div>
-            {/if}
+            <button
+                class="bg-amber-500 text-black text-lg px-4 py-1 my-1 w-full max-sm:hidden"
+                title="{cmdKey}+S"
+                on:click={save}
+            >
+                Save
+            </button>
 
             <Select
                 class="px-1 py-1"
@@ -300,15 +202,6 @@
                 --item-hover-color="#000"
                 --border="0"
             />
-
-            {#if env.PUBLIC_CUSTOM_PATHS_ENABLED === 'true' || data.loggedIn}
-                <input
-                    type="text"
-                    class="bg-dark px-2 py-1 w-full"
-                    placeholder="Custom Path"
-                    bind:value={config.customPath}
-                />
-            {/if}
 
             <div>
                 <label for="encrypted" class="py-1">Encrypted?</label>

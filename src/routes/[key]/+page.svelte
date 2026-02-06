@@ -6,7 +6,6 @@
 
     export let data: PageData;
     let {
-        isOwner,
         content,
         contentHtml,
         language,
@@ -49,11 +48,6 @@
             if (e.key === 'i' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
                 goto('/info');
-            }
-
-            if (e.key === 'e' && (e.ctrlKey || e.metaKey) && isOwner) {
-                e.preventDefault();
-                editPaste();
             }
 
             if (e.key === 'c' && e.altKey && e.shiftKey) {
@@ -111,12 +105,6 @@
         navigator.clipboard.writeText(content);
     }
 
-    function editPaste() {
-        const key = $page.params.key;
-        const keyStr = $page.url.hash.slice(1);
-        goto(`/${key}/edit#${keyStr}`);
-    }
-
     function openRaw() {
         const url = new URL($page.url.toString());
         url.searchParams.set('r', '');
@@ -136,15 +124,7 @@
 <div class="p-2 min-h-screen w-screen flex flex-col text-primary">
     <div class="pb-4">
         <div class="flex flex-row items-center gap-4">
-            <h1 class="mr-auto text-2xl"><a href="/">YABin</a></h1>
-
-            <button
-                class="underline underline-offset-4 px-2 py-1"
-                title="{cmdKey}+I"
-                on:click={() => goto('/info')}
-            >
-                Info
-            </button>
+            <h1 class="mr-auto text-2xl"><a href="/">Pastecord</a></h1>
 
             <button
                 class="underline underline-offset-4 px-2 py-1"
@@ -163,14 +143,6 @@
             >
                 Raw
             </button>
-
-            {#if isOwner}
-                <button
-                    class="bg-pink-500 text-black text-lg px-4 py-1"
-                    title="{cmdKey}+E"
-                    on:click={editPaste}>Edit</button
-                >
-            {/if}
 
             <button
                 class="bg-amber-500 text-black text-lg px-4 py-1"

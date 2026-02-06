@@ -1,14 +1,11 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import type {
     Paste,
-    PasteCreateResponse,
-    PastePatch,
-    PastePatchResponse,
+    PasteCreateResponse
 } from '$lib/types';
 import prisma from '@db';
 import { getPaste } from '$lib/server/services.js';
-import { getUserIdFromCookie } from '$lib/server/auth';
-import { env } from '$env/dynamic/public';
+import { nanoid } from 'nanoid';
 
 export const GET: RequestHandler = async ({ url }) => {
     const key = url.searchParams.get('key');
@@ -54,53 +51,18 @@ export const GET: RequestHandler = async ({ url }) => {
 
 export const POST: RequestHandler = async ({ cookies, request }) => {
     const { content, config, passwordProtected, initVector }: Paste =
-        await request.json();
+    
+    await request.json();
 
-    const userId = await getUserIdFromCookie(cookies);
-
-    if (env.PUBLIC_ANONYMOUS_PASTES_ENABLED === 'false' && !userId) {
-        return json(
-            {
-                success: false,
-                error: 'Anonymous pastes are disabled',
-            } as PasteCreateResponse,
-            {
-                status: 403,
-            },
-        );
-    }
-
-    let key: string | undefined = undefined;
-    if (
-        config?.customPath &&
-        (env.PUBLIC_CUSTOM_PATHS_ENABLED === 'true' || userId)
-    ) {
-        key = config.customPath.substring(0, 16);
-
-        if (await prisma.paste.findUnique({ where: { key } })) {
-            return json(
-                {
-                    success: false,
-                    error: 'Custom path already exists',
-                } as PasteCreateResponse,
-                {
-                    status: 400,
-                },
-            );
-        }
-    }
-
-    if (!key) {
-        let attempts = 0;
-        let keyLength = 5;
-        key = randomString(keyLength);
-        while (await prisma.paste.findUnique({ where: { key } })) {
-            key = randomString(keyLength);
-            attempts++;
-            if (attempts > 1) {
-                keyLength++;
-                attempts = 0;
-            }
+    let attempts = 0;
+    let keyLength = 5;
+    let key: string = randomString();
+    while (await prisma.paste.findUnique({ where: { key } })) {
+        key = randomString();
+        attempts++;
+        if (attempts > 1) {
+            keyLength++;
+            attempts = 0;
         }
     }
 
@@ -115,8 +77,7 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
             initVector,
             expiresAt: config?.expiresAfter
                 ? new Date(Date.now() + config.expiresAfter * 1000)
-                : null,
-            ownerId: userId,
+                : null
         },
     });
 
@@ -128,70 +89,7 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
     return json(response);
 };
 
-export const PATCH: RequestHandler = async ({ cookies, request }) => {
-    const { key, content, encrypted, initVector }: PastePatch =
-        await request.json();
 
-    const userId = await getUserIdFromCookie(cookies);
-
-    if (!key && !content) {
-        return json(
-            { success: false, error: 'No key provided' } as PastePatchResponse,
-            {
-                status: 400,
-            },
-        );
-    }
-
-    if (encrypted && !initVector) {
-        return json(
-            {
-                success: false,
-                error: 'No initVector provided',
-            } as PastePatchResponse,
-            {
-                status: 400,
-            },
-        );
-    }
-
-    const paste = await prisma.paste.findUnique({ where: { key } });
-    if (!paste) {
-        return json(
-            { success: false, error: 'Paste not found' } as PastePatchResponse,
-            {
-                status: 404,
-            },
-        );
-    }
-
-    if (paste.ownerId !== userId) {
-        return json(
-            { success: false, error: 'Unauthorized' } as PastePatchResponse,
-            {
-                status: 401,
-            },
-        );
-    }
-
-    await prisma.paste.update({
-        where: { key },
-        data: {
-            content,
-            initVector,
-        },
-    });
-
-    return json({
-        success: true,
-        data: { key },
-    });
-};
-
-function randomString(length: number) {
-    const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-    let result = '';
-    for (let i = length; i > 0; --i)
-        result += chars[Math.floor(Math.random() * chars.length)];
-    return result;
+function randomString() {
+    return nanoid();
 }

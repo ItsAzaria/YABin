@@ -1,13 +1,11 @@
-import { getUserIdFromCookie } from '$lib/server/auth';
 import { getPaste } from '$lib/server/services.js';
 import Prism from 'prismjs';
 import loadLanguages from 'prismjs/components/index.js';
 import sanitize from 'sanitize-html';
 
-export async function load({ cookies, params }) {
+export async function load({ params }) {
     const { key } = params;
 
-    const userId = await getUserIdFromCookie(cookies);
     const data = await getPaste(key);
     let { content, language, encrypted, passwordProtected, initVector } = data;
 
@@ -35,7 +33,6 @@ export async function load({ cookies, params }) {
         encrypted,
         language,
         passwordProtected,
-        initVector,
-        isOwner: userId === data.ownerId,
+        initVector
     };
 }

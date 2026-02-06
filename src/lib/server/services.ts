@@ -11,8 +11,7 @@ export async function getPaste(key: string) {
             initVector: true,
             language: true,
             expiresCount: true,
-            readCount: true,
-            ownerId: true,
+            readCount: true
         },
     });
 
@@ -35,7 +34,6 @@ export async function getPaste(key: string) {
         passwordProtected,
         initVector,
         language,
-        ownerId,
     } = data;
 
     return {
@@ -44,8 +42,7 @@ export async function getPaste(key: string) {
         encrypted,
         passwordProtected,
         initVector,
-        language,
-        ownerId,
+        language
     };
 }
 

@@ -1,6 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+    -- color-primary: --var(--color-primary);
+    -- color-background: --var(--color-background);
+    --color-dark: --var(--color-dark);
+
+}
 
 :root {
     --color-primary: #e5e1d1;
@@ -9,13 +14,14 @@
 }
 
 body {
-    @apply bg-background;
-    @apply text-primary;
+    background-color: var(--color-background);
+    color: var(--color-primary);
 }
 
 @layer utilities {
+
     input[type='number']::-webkit-inner-spin-button,
     input[type='number']::-webkit-outer-spin-button {
-        @apply appearance-none;
+        appearance: none;
     }
 }

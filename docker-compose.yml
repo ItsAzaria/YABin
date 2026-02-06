@@ -1,12 +1,12 @@
 version: '3.3'
 networks:
-  yabin-network:
-    name: yabin-network
+  pastecord-network:
+    name: pastecord-network
     ipam:
       driver: default
 services:
-  yabin:
-    container_name: yabin
+  pastecord:
+    container_name: pastecord
     ports:
       - '${PORT:-3000}:${PORT:-3000}'
     image: 'yureien/yabin:latest'
@@ -14,20 +14,20 @@ services:
     depends_on:
       - db
     networks:
-      - yabin-network
+      - pastecord-network
   db:
-    container_name: yabin-db
+    container_name: pastecord-db
     restart: always
     image: postgres:15-alpine
     env_file: .env
     expose:
       - '5432'
     environment:
-      POSTGRES_USER: ${DB_USER:-yabin_user}
+      POSTGRES_USER: ${DB_USER:-pastecord_user}
       POSTGRES_PASSWORD: ${DB_USER_PASS:-123}
-      POSTGRES_DB: ${DB_NAME:-yabin_db}
+      POSTGRES_DB: ${DB_NAME:-pastecord_db}
       POSTGRES_HOST_AUTH_METHOD: "trust"
     volumes:
       - ./db-data:/var/lib/postgresql/data
     networks:
-      - yabin-network
+      - pastecord-network

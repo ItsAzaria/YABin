@@ -7,8 +7,7 @@ export default {
         extend: {
             colors: {
                 primary: 'var(--color-primary)',
-                background: 'var(--color-background)',
-                dark: 'var(--color-dark)',
+                background: 'var(--color-background)'
             },
             fontFamily: {
                 sans: ['Fira Mono', ...defaultTheme.fontFamily.mono],
