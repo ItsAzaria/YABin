@@ -15,7 +15,6 @@ node_modules
 build
 package
 cli
-**/.env
 .env.example
 k8s
 .github
