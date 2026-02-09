@@ -192,8 +192,8 @@
                     label,
                     value,
                 }))}
-                selectedValue={config.language}
                 onchange={(value: any) => config.language = value.value}
+                bind:value={config.language}
                 showChevron
                 clearable={false}
                 --background="var(--color-dark)"
