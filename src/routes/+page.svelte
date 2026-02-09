@@ -192,8 +192,8 @@
                     label,
                     value,
                 }))}
-                value={config.language}
-                bind:justValue={config.language}
+                selectedValue={config.language}
+                onchange={(value: any) => config.language = value.value}
                 showChevron
                 clearable={false}
                 --background="var(--color-dark)"

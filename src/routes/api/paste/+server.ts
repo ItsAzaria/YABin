@@ -54,6 +54,8 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
     
     await request.json();
 
+    console.log(content, config, passwordProtected, initVector);
+
     let attempts = 0;
     let keyLength = 5;
     let key: string = randomString();
